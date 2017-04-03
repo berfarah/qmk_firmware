@@ -226,7 +226,9 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 
 // Runs just one time when the keyboard initializes.
 void matrix_init_user(void) {
-
+  rgblight_enable();
+  rgblight_mode(3);
+  rgblight_setrgb(20,0,35);  // purple
 };
 
 // Runs constantly in the background, in a loop.
@@ -242,12 +244,15 @@ void matrix_scan_user(void) {
       // TODO: Make this relevant to the ErgoDox EZ.
         case NUMS:
             ergodox_right_led_1_on();
+            rgblight_setrgb(0,20,20);  // light blue
             break;
         case MOVE:
             ergodox_right_led_2_on();
+            rgblight_setrgb(25,20,0); // orange
             break;
         case AFK:
             ergodox_right_led_3_on();
+            rgblight_setrgb(20,2,20); //red
         default:
             break;
     }
