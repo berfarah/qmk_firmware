@@ -217,7 +217,7 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
         case MACRO_WAKE:
         if (!record->event.pressed) {
           layer_off(AFK);
-          return MACRO(T(WAKE), T(SPC), END);
+          return MACRO(T(WAKE), END);
         }
         break;
       }
@@ -227,8 +227,7 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 // Runs just one time when the keyboard initializes.
 void matrix_init_user(void) {
   rgblight_enable();
-  rgblight_mode(3);
-  rgblight_setrgb(20,0,35);  // purple
+  rgblight_mode(1);
 };
 
 // Runs constantly in the background, in a loop.
@@ -241,18 +240,20 @@ void matrix_scan_user(void) {
     ergodox_right_led_2_off();
     ergodox_right_led_3_off();
     switch (layer) {
-      // TODO: Make this relevant to the ErgoDox EZ.
+        case BASE:
+            rgblight_setrgb(20,0,35);  // purple
+            break;
         case NUMS:
             ergodox_right_led_1_on();
             rgblight_setrgb(0,20,20);  // light blue
             break;
         case MOVE:
             ergodox_right_led_2_on();
-            rgblight_setrgb(25,20,0); // orange
+            rgblight_setrgb(35,10,0); // orange
             break;
         case AFK:
             ergodox_right_led_3_on();
-            rgblight_setrgb(20,2,20); //red
+            rgblight_setrgb(35,0,0); //red
         default:
             break;
     }
