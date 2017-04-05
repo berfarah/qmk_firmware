@@ -2,7 +2,6 @@
 // 1. The Cmd key is now on the right side, making Cmd+Space easier.
 // 2. The media keys work on OSX (But not on Windows).
 #include "ez.h"
-#include "debug.h"
 #include "action_layer.h"
 
 enum keyboard_layers {
@@ -15,11 +14,14 @@ enum keyboard_layers {
 enum keyboard_macros {
   MACRO_AFK = 0,
   MACRO_WAKE,
-  MACRO_OTHER
+  MACRO_LAYER_NUMS,
+  MACRO_LAYER_MOVE,
 };
 
 #define BF_AFK M(MACRO_AFK)
 #define BF_WAKE M(MACRO_WAKE)
+#define BF_NUMS M(MACRO_LAYER_NUMS)
+#define BF_MOVE M(MACRO_LAYER_MOVE)
 #define BF_LYR(layer) MT(MO(layer), TG(layer)) // Mod or toggle layer (hold vs tap)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -51,8 +53,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_GRV,         KC_1,         KC_2,   KC_3,   KC_4,   KC_5,   KC_6,
         KC_TAB,         KC_Q,         KC_W,   KC_E,   KC_R,   KC_T,   KC_LBRC,
         CTL_T(KC_ESC),  KC_A,         KC_S,   KC_D,   KC_F,   KC_G,
-        KC_LSFT,        KC_Z,         KC_X,   KC_C,   KC_V,   KC_B,   MO(NUMS),
-        ALL_T(KC_NO),   KC_F19,       KC_LALT,MO(MOVE),MO(NUMS),
+        KC_LSFT,        KC_Z,         KC_X,   KC_C,   KC_V,   KC_B,   BF_NUMS,
+        ALL_T(KC_NO),   KC_F19,       KC_LALT,BF_MOVE,BF_NUMS,
                                                       KC_VOLD,KC_VOLU,
                                                               KC_MUTE,
                                                KC_SPC,KC_LGUI,KC_LALT,
@@ -61,8 +63,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         BF_AFK,    KC_7,   KC_8,   KC_9,   KC_0,   KC_MINS,          KC_EQL,
         KC_RBRC,     KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,             KC_BSLS,
                      KC_H,   KC_J,   KC_K,   KC_L,   KC_SCLN,          KC_QUOT,
-        MO(NUMS),KC_N, KC_M,   KC_COMM,KC_DOT, KC_SLSH,          KC_RSFT,
-                        MO(NUMS),MO(MOVE),CTL_T(KC_ESC),KC_F19,     MEH_T(KC_NO),
+        BF_NUMS,KC_N, KC_M,   KC_COMM,KC_DOT, KC_SLSH,          KC_RSFT,
+                        BF_NUMS,BF_MOVE,CTL_T(KC_ESC),KC_F19,     MEH_T(KC_NO),
         KC_MNXT,        KC_MPLY,
         KC_MPRV,
         KC_LALT,KC_BSPC,KC_ENT
@@ -204,6 +206,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 const uint16_t PROGMEM fn_actions[] = {
 };
 
+uint8_t layer_stack = 0;
+void rgblight_reset_mode(void) {
+  if (layer_stack != 0) return;
+  rgblight_setrgb(20,0,35);  // purple
+  rgblight_mode(3);
+};
+
+void mod_layer_with_rgb(keyrecord_t *record, uint8_t layer, uint8_t r, uint8_t g, uint8_t b) {
+  if (record->event.pressed) {
+    rgblight_mode(1);
+    layer_stack++;
+    layer_on(layer);
+    rgblight_setrgb(r, g, b);
+  } else {
+    layer_stack--;
+    layer_off(layer);
+    rgblight_reset_mode();
+  }
+};
+
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 {
   // MACRODOWN only works in this function
@@ -211,14 +233,23 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
         case MACRO_AFK:
         if (!record->event.pressed) {
           layer_on(AFK);
+          rgblight_setrgb(35,0,0); //red
+          rgblight_mode(23); // knight mode
           return MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END);
         }
         break;
         case MACRO_WAKE:
         if (!record->event.pressed) {
           layer_off(AFK);
+          rgblight_reset_mode();
           return MACRO(T(WAKE), END);
         }
+        break;
+        case MACRO_LAYER_NUMS:
+          mod_layer_with_rgb(record, NUMS, 0, 20, 20);
+        break;
+        case MACRO_LAYER_MOVE:
+          mod_layer_with_rgb(record, MOVE, 35, 10, 0);
         break;
       }
     return MACRO_NONE;
@@ -241,19 +272,15 @@ void matrix_scan_user(void) {
     ergodox_right_led_3_off();
     switch (layer) {
         case BASE:
-            rgblight_setrgb(20,0,35);  // purple
             break;
         case NUMS:
             ergodox_right_led_1_on();
-            rgblight_setrgb(0,20,20);  // light blue
             break;
         case MOVE:
             ergodox_right_led_2_on();
-            rgblight_setrgb(35,10,0); // orange
             break;
         case AFK:
             ergodox_right_led_3_on();
-            rgblight_setrgb(35,0,0); //red
         default:
             break;
     }
