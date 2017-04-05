@@ -16,12 +16,22 @@ enum keyboard_macros {
   MACRO_WAKE,
   MACRO_LAYER_NUMS,
   MACRO_LAYER_MOVE,
+  MACRO_VIM_B,
+  MACRO_VIM_W,
+  MACRO_VIM_ENDLINE,
+  MACRO_VIM_BGNLINE,
+  MACRO_DELETE_WORD,
 };
 
 #define BF_AFK M(MACRO_AFK)
 #define BF_WAKE M(MACRO_WAKE)
 #define BF_NUMS M(MACRO_LAYER_NUMS)
 #define BF_MOVE M(MACRO_LAYER_MOVE)
+#define VIM_B M(MACRO_VIM_B)
+#define VIM_W M(MACRO_VIM_W)
+#define VIM_END M(MACRO_VIM_ENDLINE)
+#define VIM_BGN M(MACRO_VIM_BGNLINE)
+#define BF_DEL M(MACRO_DELETE_WORD)
 #define BF_LYR(layer) MT(MO(layer), TG(layer)) // Mod or toggle layer (hold vs tap)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -90,7 +100,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 |      |      |      |       |      |      |      |
  *                                 `--------------------'       `--------------------'
  */
-// NUMSOLS
 [NUMS] = KEYMAP(
        // left hand
        KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
@@ -118,11 +127,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * |        |      |VIM W |      |      |      |      |           |      |      |      |      |      |      |        |
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
  * |        |      |      |      |      |      |------|           |------| LEFT | DOWN |  UP  |RIGHT |      |        |
  * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
- * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * |        |      |      |      |      |VIM B |      |           |      |      |      |      |      |      |        |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
  *   |      |      |      |      |      |                                       |      |      |      |      |      |
  *   `----------------------------------'                                       `----------------------------------'
@@ -134,13 +143,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 |      |      |      |       |      |      |      |
  *                                 `--------------------'       `--------------------'
  */
-// NUMSOLS
 [MOVE] = KEYMAP(
        // left hand
        KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
-       KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
-       KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
-       KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
+       KC_TRNS,KC_TRNS,VIM_W,  KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
+       KC_TRNS,KC_TRNS,KC_TRNS,VIM_BGN,VIM_END,KC_TRNS,
+       KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,VIM_B,  KC_TRNS,
        KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
                                        KC_TRNS,KC_TRNS,
                                                KC_TRNS,
@@ -154,7 +162,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                        KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,
        KC_TRNS,KC_TRNS,
        KC_TRNS,
-       KC_TRNS,KC_TRNS,KC_TRNS
+       KC_TRNS,BF_DEL ,KC_TRNS
 ),
 
 /* Keymap 3: AFK Layer
@@ -179,7 +187,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 |      |      |      |       |      |      |      |
  *                                 `--------------------'       `--------------------'
  */
-// NUMSOLS
 [AFK] = KEYMAP(
        // left hand
        BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
@@ -228,8 +235,25 @@ void mod_layer_with_rgb(keyrecord_t *record, uint8_t layer, uint8_t r, uint8_t g
 
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 {
+  bool shift_active = keyboard_report->mods & (MOD_BIT(KC_LSFT) | MOD_BIT(KC_LSFT));
   // MACRODOWN only works in this function
       switch(id) {
+        case MACRO_VIM_B:
+          return MACRODOWN(D(LALT), T(LEFT), U(LALT), END);
+        break;
+        case MACRO_VIM_W:
+          return MACRODOWN(D(LALT), T(RGHT), U(LALT), END);
+        break;
+        case MACRO_VIM_BGNLINE:
+          return MACRODOWN(D(LGUI), T(LEFT), U(LGUI), END);
+        break;
+        case MACRO_VIM_ENDLINE:
+          return MACRODOWN(D(LGUI), T(RGHT), U(LGUI), END);
+        break;
+        case MACRO_DELETE_WORD:
+          if (shift_active) return MACRODOWN(U(LSFT), D(LGUI), T(BSPC), U(LGUI), D(LSFT), END);
+          return MACRODOWN(D(LALT), T(BSPC), U(LALT));
+        break;
         case MACRO_AFK:
         if (!record->event.pressed) {
           layer_on(AFK);
