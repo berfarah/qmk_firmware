@@ -1,6 +1,5 @@
 /*
 Copyright 2012 Jun Wako <wakojun@gmail.com>
-Copyright 2013 Oleg Kostyuk <cub.uanic@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,25 +22,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* USB Device descriptor parameter */
 #define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0x1307
+#define PRODUCT_ID      0x6061
 #define DEVICE_VER      0x0001
-#define MANUFACTURER    ErgoDox EZ
-#define PRODUCT         ErgoDox EZ
-#define DESCRIPTION     t.m.k. keyboard firmware for Ergodox
+#define MANUFACTURER    Ortholinear Keyboards
+#define PRODUCT         The Preonic Keyboard
+#define DESCRIPTION     A compact ortholinear keyboard
 
 /* key matrix size */
-#define MATRIX_ROWS 14
-#define MATRIX_COLS 6
+#define MATRIX_ROWS 5
+#define MATRIX_COLS 12
 
-#define MOUSEKEY_DELAY          100
-#define MOUSEKEY_INTERVAL       20
-#define MOUSEKEY_MAX_SPEED      3
-#define MOUSEKEY_TIME_TO_MAX    10
+/* Planck PCB default pin-out */
+#define MATRIX_ROW_PINS { D2, D5, B5, B6, D3 }
+#define MATRIX_COL_PINS { F1, F0, B0, C7, F4, F5, F6, F7, D4, D6, B4, D7 }
+#define UNUSED_PINS
 
-#define TAPPING_TOGGLE  1
+#define AUDIO_VOICES
 
-#define COLS (int []){ F1, F0, B0, C7, F4, F5, F6, F7, D4, D6, B4, D7 }
-#define ROWS (int []){ D0, D5, B5, B6 }
+#define BACKLIGHT_PIN B7
 
 /* COL2ROW or ROW2COL */
 #define DIODE_DIRECTION COL2ROW
@@ -53,9 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define BACKLIGHT_LEVELS 3
 
 /* Set 0 if debouncing isn't needed */
-#define DEBOUNCE    2
-#define TAPPING_TERM    200
-// #define IGNORE_MOD_TAP_INTERRUPT // this makes it possible to do rolling combos (zx) with keys that convert to other keys on hold (z becomes ctrl when you hold it, and when this option isn't enabled, z rapidly followed by x actually sends Ctrl-x. That's bad.)
+#define DEBOUNCING_DELAY 5
 
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
 #define LOCKING_SUPPORT_ENABLE
@@ -64,9 +60,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* key combination for command */
 #define IS_COMMAND() ( \
-    keyboard_report->mods == (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL)) || \
-    keyboard_report->mods == (MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT)) \
+    keyboard_report->mods == (MOD_BIT(KC_LSHIFT) | MOD_BIT(KC_RSHIFT)) \
 )
+
+/* ws2812 RGB LED */
+#define RGB_DI_PIN D1
+#define RGBLIGHT_ANIMATIONS
+#define RGBLED_NUM 28     // Number of LEDs
+#define RGBLIGHT_HUE_STEP 10
+#define RGBLIGHT_SAT_STEP 17
+#define RGBLIGHT_VAL_STEP 17
 
 /*
  * Feature disable options
@@ -85,6 +88,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define NO_ACTION_ONESHOT
 //#define NO_ACTION_MACRO
 //#define NO_ACTION_FUNCTION
-//#define DEBUG_MATRIX_SCAN_RATE
 
 #endif
