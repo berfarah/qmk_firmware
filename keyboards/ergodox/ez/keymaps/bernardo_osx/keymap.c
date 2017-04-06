@@ -258,17 +258,19 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt) {
     break;
     case MACRO_AFK:
     if (record->event.pressed) {
-      layer_on(AFK);
       rgblight_setrgb(35,0,0); //red
       rgblight_mode(4); // knight mode
-      return MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END);
+      action_macro_play(
+        MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END)
+      );
+      layer_on(AFK);
     }
     break;
     case MACRO_WAKE:
     if (record->event.pressed) {
       layer_off(AFK);
       rgblight_reset_mode();
-      return MACRO(T(WAKE), END);
+      return MACRO(T(WAKE), T(SPC), END);
     }
     break;
     case MACRO_LAYER_NUMS:
