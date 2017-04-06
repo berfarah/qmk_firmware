@@ -253,25 +253,24 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt) {
       return MACRODOWN(D(LGUI), T(RGHT), U(LGUI), END);
     break;
     case MACRO_DELETE_WORD:
-      if (shift_active) return MACRODOWN(U(LSFT), D(LGUI), T(BSPC), U(LGUI), D(LSFT), END);
-      return MACRODOWN(D(LALT), T(BSPC), U(LALT));
+      if (!shift_active) return MACRODOWN(D(LALT), T(BSPC), U(LALT), END);
+      clear_mods();
+      return MACRODOWN(D(LGUI), T(BSPC), U(LGUI), END);
     break;
     case MACRO_AFK:
-    if (record->event.pressed) {
-      rgblight_setrgb(35,0,0); //red
-      rgblight_mode(4); // knight mode
+      if (!record->event.pressed) return MACRO_NONE;
       action_macro_play(
         MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END)
       );
       layer_on(AFK);
-    }
+      rgblight_setrgb(35,0,0); //red
+      rgblight_mode(4); // knight mode
     break;
     case MACRO_WAKE:
-    if (record->event.pressed) {
+      if (!record->event.pressed) return MACRO_NONE;
       layer_off(AFK);
       rgblight_reset_mode();
       return MACRO(T(WAKE), T(SPC), END);
-    }
     break;
     case MACRO_LAYER_NUMS:
       mod_layer_with_rgb(record, NUMS, 0, 20, 20);
