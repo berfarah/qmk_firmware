@@ -199,7 +199,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                BF_WAKE,BF_WAKE,BF_WAKE,
 
        // right hand
-       BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
+       KC_TRNS,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
        BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
                 BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
        BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,BF_WAKE,
@@ -233,80 +233,82 @@ void mod_layer_with_rgb(keyrecord_t *record, uint8_t layer, uint8_t r, uint8_t g
   }
 };
 
-const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
-{
-  bool shift_active = keyboard_report->mods & (MOD_BIT(KC_LSFT) | MOD_BIT(KC_LSFT));
+const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt) {
+  bool shift_active = (
+    keyboard_report->mods & (MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT))
+  );
+
   // MACRODOWN only works in this function
-      switch(id) {
-        case MACRO_VIM_B:
-          return MACRODOWN(D(LALT), T(LEFT), U(LALT), END);
-        break;
-        case MACRO_VIM_W:
-          return MACRODOWN(D(LALT), T(RGHT), U(LALT), END);
-        break;
-        case MACRO_VIM_BGNLINE:
-          return MACRODOWN(D(LGUI), T(LEFT), U(LGUI), END);
-        break;
-        case MACRO_VIM_ENDLINE:
-          return MACRODOWN(D(LGUI), T(RGHT), U(LGUI), END);
-        break;
-        case MACRO_DELETE_WORD:
-          if (shift_active) return MACRODOWN(U(LSFT), D(LGUI), T(BSPC), U(LGUI), D(LSFT), END);
-          return MACRODOWN(D(LALT), T(BSPC), U(LALT));
-        break;
-        case MACRO_AFK:
-        if (!record->event.pressed) {
-          layer_on(AFK);
-          rgblight_setrgb(35,0,0); //red
-          rgblight_mode(23); // knight mode
-          return MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END);
-        }
-        break;
-        case MACRO_WAKE:
-        if (!record->event.pressed) {
-          layer_off(AFK);
-          rgblight_reset_mode();
-          return MACRO(T(WAKE), END);
-        }
-        break;
-        case MACRO_LAYER_NUMS:
-          mod_layer_with_rgb(record, NUMS, 0, 20, 20);
-        break;
-        case MACRO_LAYER_MOVE:
-          mod_layer_with_rgb(record, MOVE, 35, 10, 0);
-        break;
-      }
-    return MACRO_NONE;
+  switch(id) {
+    case MACRO_VIM_B:
+      return MACRODOWN(D(LALT), T(LEFT), U(LALT), END);
+    break;
+    case MACRO_VIM_W:
+      return MACRODOWN(D(LALT), T(RGHT), U(LALT), END);
+    break;
+    case MACRO_VIM_BGNLINE:
+      return MACRODOWN(D(LGUI), T(LEFT), U(LGUI), END);
+    break;
+    case MACRO_VIM_ENDLINE:
+      return MACRODOWN(D(LGUI), T(RGHT), U(LGUI), END);
+    break;
+    case MACRO_DELETE_WORD:
+      if (shift_active) return MACRODOWN(U(LSFT), D(LGUI), T(BSPC), U(LGUI), D(LSFT), END);
+      return MACRODOWN(D(LALT), T(BSPC), U(LALT));
+    break;
+    case MACRO_AFK:
+    if (record->event.pressed) {
+      layer_on(AFK);
+      rgblight_setrgb(35,0,0); //red
+      rgblight_mode(4); // knight mode
+      return MACRO(I(50), D(LCTL), D(LSFT), T(POWER), U(LSFT), U(LCTL), END);
+    }
+    break;
+    case MACRO_WAKE:
+    if (record->event.pressed) {
+      layer_off(AFK);
+      rgblight_reset_mode();
+      return MACRO(T(WAKE), END);
+    }
+    break;
+    case MACRO_LAYER_NUMS:
+      mod_layer_with_rgb(record, NUMS, 0, 20, 20);
+    break;
+    case MACRO_LAYER_MOVE:
+      mod_layer_with_rgb(record, MOVE, 35, 10, 0);
+    break;
+  }
+  return MACRO_NONE;
 };
 
 // Runs just one time when the keyboard initializes.
 void matrix_init_user(void) {
   rgblight_enable();
-  rgblight_mode(1);
+  rgblight_reset_mode();
 };
 
 // Runs constantly in the background, in a loop.
 void matrix_scan_user(void) {
+  uint8_t layer = biton32(layer_state);
 
-    uint8_t layer = biton32(layer_state);
-
-    ergodox_board_led_off();
-    ergodox_right_led_1_off();
-    ergodox_right_led_2_off();
-    ergodox_right_led_3_off();
-    switch (layer) {
-        case BASE:
-            break;
-        case NUMS:
-            ergodox_right_led_1_on();
-            break;
-        case MOVE:
-            ergodox_right_led_2_on();
-            break;
-        case AFK:
-            ergodox_right_led_3_on();
-        default:
-            break;
-    }
+  ergodox_board_led_off();
+  ergodox_right_led_1_off();
+  ergodox_right_led_2_off();
+  ergodox_right_led_3_off();
+  switch (layer) {
+    case BASE:
+    break;
+    case NUMS:
+      ergodox_right_led_1_on();
+    break;
+    case MOVE:
+      ergodox_right_led_2_on();
+    break;
+    case AFK:
+      ergodox_right_led_3_on();
+    break;
+    default:
+      break;
+  }
 
 };
